@@ -1,0 +1,21 @@
+{{- if .Values.database.enabled }}
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: {{ .Values.database.name }}
+  namespace: {{ include "ai-hub-manifest.targetNamespace" . }}
+  labels:
+    app.kubernetes.io/name: {{ .Values.database.name }}
+    app.kubernetes.io/component: database
+    {{- include "ai-hub-manifest.labels" . | nindent 4 }}
+spec:
+  instances: {{ .Values.database.instances }}
+  imageName: {{ .Values.database.imageName }}
+  {{- if .Values.database.storage }}
+  {{- with .Values.database.storage.size }}
+  storage:
+    size: {{ . }}
+  {{- end }}
+  {{- end }}
+{{- end }}
+

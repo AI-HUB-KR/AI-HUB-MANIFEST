@@ -1,0 +1,63 @@
+# Global overrides
+nameOverride: ""
+fullnameOverride: ""
+
+namespace:
+  create: true
+  name: ai-hub
+
+commonLabels: {}
+
+database:
+  enabled: true
+  name: my-db
+  instances: 2
+  imageName: ghcr.io/cloudnative-pg/postgresql:17
+  storage:
+    size: 30Gi
+  appSecret:
+    name: my-db-app
+    usernameKey: username
+    passwordKey: password
+
+springApp:
+  enabled: true
+  name: main-server
+  replicas: 2
+  # AI-HUB-BE에서 springApp.image로 찾음. 따라서 키 값 수정시 AI-HUB-BE도 수정해야 함.
+  image: ghcr.io/AI-HUB-KR/main-server:latest
+  containerPort: 8080
+  springProfile: prod
+  imagePullSecrets: []
+  resources: {}
+  podAnnotations: {}
+  service:
+    name: main-svc
+    type: ClusterIP
+    port: 8080
+    targetPort: 8080
+  prodSecret:
+    name: my-app-secrets
+    passwordKey: db-password
+  db:
+    url: jdbc:postgresql://my-db-rw:5432/maindb
+
+nestApp:
+  enabled: true
+  name: ai-api-server
+  replicas: 2
+  image: ghcr.io/AI-HUB-KR/ai-api-server:latest
+  containerPort: 3000
+  imagePullSecrets: []
+  resources: {}
+  podAnnotations: {}
+  service:
+    name: ai-api-svc
+    type: ClusterIP
+    port: 3000
+    targetPort: 3000
+  db:
+    host: my-db-rw
+    port: 5432
+    name: maindb
+

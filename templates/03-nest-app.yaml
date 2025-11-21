@@ -1,0 +1,78 @@
+{{- if .Values.nestApp.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.nestApp.name }}
+  namespace: {{ include "ai-hub-manifest.targetNamespace" . }}
+  labels:
+    app.kubernetes.io/name: {{ .Values.nestApp.name }}
+    app.kubernetes.io/component: nest-app
+    {{- include "ai-hub-manifest.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.nestApp.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.nestApp.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.nestApp.name }}
+        app.kubernetes.io/name: {{ .Values.nestApp.name }}
+        app.kubernetes.io/component: nest-app
+      {{- with .Values.nestApp.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      {{- with .Values.nestApp.imagePullSecrets }}
+      imagePullSecrets:
+        {{- range . }}
+        - name: {{ . }}
+        {{- end }}
+      {{- end }}
+      containers:
+        - name: nest
+          image: {{ .Values.nestApp.image }}
+          ports:
+            - containerPort: {{ .Values.nestApp.containerPort }}
+          env:
+            - name: DB_HOST
+              value: {{ .Values.nestApp.db.host | quote }}
+            - name: DB_PORT
+              value: {{ printf "%d" .Values.nestApp.db.port | quote }}
+            - name: DB_NAME
+              value: {{ .Values.nestApp.db.name | quote }}
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.database.appSecret.name }}
+                  key: {{ .Values.database.appSecret.usernameKey }}
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.database.appSecret.name }}
+                  key: {{ .Values.database.appSecret.passwordKey }}
+          {{- with .Values.nestApp.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.nestApp.service.name }}
+  namespace: {{ include "ai-hub-manifest.targetNamespace" . }}
+  labels:
+    app.kubernetes.io/name: {{ .Values.nestApp.name }}
+    app.kubernetes.io/component: nest-app
+    {{- include "ai-hub-manifest.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.nestApp.service.type }}
+  ports:
+    - port: {{ .Values.nestApp.service.port }}
+      targetPort: {{ .Values.nestApp.service.targetPort }}
+      protocol: TCP
+  selector:
+    app: {{ .Values.nestApp.name }}
+{{- end }}
+

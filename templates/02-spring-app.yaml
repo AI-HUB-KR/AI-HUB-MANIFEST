@@ -1,0 +1,81 @@
+{{- if .Values.springApp.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.springApp.name }}
+  namespace: {{ include "ai-hub-manifest.targetNamespace" . }}
+  labels:
+    app.kubernetes.io/name: {{ .Values.springApp.name }}
+    app.kubernetes.io/component: spring-app
+    {{- include "ai-hub-manifest.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.springApp.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.springApp.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.springApp.name }}
+        app.kubernetes.io/name: {{ .Values.springApp.name }}
+        app.kubernetes.io/component: spring-app
+      {{- with .Values.springApp.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      {{- with .Values.springApp.imagePullSecrets }}
+      imagePullSecrets:
+        {{- range . }}
+        - name: {{ . }}
+        {{- end }}
+      {{- end }}
+      containers:
+        - name: spring
+          image: {{ .Values.springApp.image }}
+          ports:
+            - containerPort: {{ .Values.springApp.containerPort }}
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: {{ .Values.springApp.springProfile | quote }}
+            - name: PROD_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.springApp.prodSecret.name }}
+                  key: {{ .Values.springApp.prodSecret.passwordKey }}
+            - name: DB_URL
+              value: {{ .Values.springApp.db.url | quote }}
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.database.appSecret.name }}
+                  key: {{ .Values.database.appSecret.usernameKey }}
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.database.appSecret.name }}
+                  key: {{ .Values.database.appSecret.passwordKey }}
+          {{- with .Values.springApp.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.springApp.service.name }}
+  namespace: {{ include "ai-hub-manifest.targetNamespace" . }}
+  labels:
+    app.kubernetes.io/name: {{ .Values.springApp.name }}
+    app.kubernetes.io/component: spring-app
+    {{- include "ai-hub-manifest.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.springApp.service.type }}
+  ports:
+    - port: {{ .Values.springApp.service.port }}
+      targetPort: {{ .Values.springApp.service.targetPort }}
+      protocol: TCP
+  selector:
+    app: {{ .Values.springApp.name }}
+{{- end }}
+

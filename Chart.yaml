@@ -1,0 +1,7 @@
+apiVersion: v2
+name: ai-hub-manifest
+description: Helm chart for the AI-HUB namespace, database cluster, and applications
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+
