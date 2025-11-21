@@ -1,12 +1,10 @@
 # Global overrides
 nameOverride: ""
 fullnameOverride: ""
-
 namespace:
   create: true
   name: ai-hub
 commonLabels: {}
-
 database:
   enabled: true
   name: my-db
@@ -25,7 +23,6 @@ database:
     hostKey: host
     portKey: port
     dbnameKey: dbname
-
 springApp:
   enabled: true
   name: main-server
@@ -42,7 +39,6 @@ springApp:
     type: ClusterIP
     port: 8080
     targetPort: 8080
-
 nestApp:
   enabled: true
   name: ai-api-server
