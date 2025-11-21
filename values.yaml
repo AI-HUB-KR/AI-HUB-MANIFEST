@@ -54,3 +54,5 @@ springApp:
     type: ClusterIP
     port: 3000
     targetPort: 3000
+nestApp:
+  image: ghcr.io/AI-HUB-KR/ai-api-server:d9432cfbad42bf231dcbfd98ad22448c88b58aa4
