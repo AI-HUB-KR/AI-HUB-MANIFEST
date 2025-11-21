@@ -20,12 +20,7 @@ database:
     usernameKey: username
     passwordKey: password
 
-springApp:
-  enabled: true
-  name: main-server
-  replicas: 2
-  # AI-HUB-BE에서 springApp.image로 찾음. 따라서 키 값 수정시 AI-HUB-BE도 수정해야 함.
-  image: ghcr.io/AI-HUB-KR/main-server:latest
+{SPRING_IMAGE}:{GIT_SHA}
   containerPort: 8080
   springProfile: prod
   imagePullSecrets: []
