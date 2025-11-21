@@ -1,13 +1,10 @@
 # Global overrides
 nameOverride: ""
 fullnameOverride: ""
-
 namespace:
   create: true
   name: ai-hub
-
 commonLabels: {}
-
 database:
   enabled: true
   name: my-db
@@ -19,13 +16,12 @@ database:
     name: my-db-app
     usernameKey: username
     passwordKey: password
-
 springApp:
   enabled: true
   name: main-server
   replicas: 2
   # AI-HUB-BE에서 springApp.image로 찾음. 따라서 키 값 수정시 AI-HUB-BE도 수정해야 함.
-  image: ghcr.io/AI-HUB-KR/main-server:latest
+  image: ghcr.io/AI-HUB-KR/main-server:afc3c89506f72312bdab7ae2eb7c0add65d07aa9
   containerPort: 8080
   springProfile: prod
   imagePullSecrets: []
@@ -41,7 +37,6 @@ springApp:
     passwordKey: db-password
   db:
     url: jdbc:postgresql://my-db-rw:5432/maindb
-
 nestApp:
   enabled: true
   name: ai-api-server
@@ -60,4 +55,3 @@ nestApp:
     host: my-db-rw
     port: 5432
     name: maindb
-
