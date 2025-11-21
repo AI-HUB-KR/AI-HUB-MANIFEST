@@ -3,6 +3,7 @@ nameOverride: ""
 fullnameOverride: ""
 namespace:
   name: ai-hub
+  create: true
 commonLabels: {}
 database:
   enabled: true
