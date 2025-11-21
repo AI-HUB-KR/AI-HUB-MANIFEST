@@ -10,12 +10,19 @@ database:
   name: my-db
   instances: 2
   imageName: ghcr.io/cloudnative-pg/postgresql:17
+  initdb:
+    database: ai_hub_db
+    owner: ai_hub_admin
   storage:
     size: 30Gi
   appSecret:
     name: my-db-app
     usernameKey: username
     passwordKey: password
+    jdbcKey: jdbc-uri
+    hostKey: host
+    portKey: port
+    dbnameKey: dbname
 springApp:
   enabled: true
   name: main-server
@@ -32,15 +39,11 @@ springApp:
     type: ClusterIP
     port: 8080
     targetPort: 8080
-  prodSecret:
-    name: my-app-secrets
-    passwordKey: db-password
-  db:
-    url: jdbc:postgresql://my-db-rw:5432/maindb
-nestApp:
+  nestApp:
   enabled: true
   name: ai-api-server
   replicas: 2
+  # AI-HUB-BE에서 nestApp.image로 찾음. 따라서 키 값 수정시 AI-API-SERVER도 수정해야 함.
   image: ghcr.io/AI-HUB-KR/ai-api-server:latest
   containerPort: 3000
   imagePullSecrets: []
@@ -51,7 +54,3 @@ nestApp:
     type: ClusterIP
     port: 3000
     targetPort: 3000
-  db:
-    host: my-db-rw
-    port: 5432
-    name: maindb

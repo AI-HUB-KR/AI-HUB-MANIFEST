@@ -35,13 +35,34 @@ spec:
           image: {{ .Values.nestApp.image }}
           ports:
             - containerPort: {{ .Values.nestApp.containerPort }}
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: {{ .Values.nestApp.containerPort }}
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: {{ .Values.nestApp.containerPort }}
+            initialDelaySeconds: 10
+            periodSeconds: 5
           env:
             - name: DB_HOST
-              value: {{ .Values.nestApp.db.host | quote }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.database.appSecret.name }}
+                  key: {{ default "host" .Values.database.appSecret.hostKey }}
             - name: DB_PORT
-              value: {{ printf "%d" .Values.nestApp.db.port | quote }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.database.appSecret.name }}
+                  key: {{ default "port" .Values.database.appSecret.portKey }}
             - name: DB_NAME
-              value: {{ .Values.nestApp.db.name | quote }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.database.appSecret.name }}
+                  key: {{ default "dbname" .Values.database.appSecret.dbnameKey }}
             - name: DB_USERNAME
               valueFrom:
                 secretKeyRef:

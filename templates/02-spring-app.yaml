@@ -38,13 +38,11 @@ spec:
           env:
             - name: SPRING_PROFILES_ACTIVE
               value: {{ .Values.springApp.springProfile | quote }}
-            - name: PROD_DB_PASSWORD
+            - name: DB_URL
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.springApp.prodSecret.name }}
-                  key: {{ .Values.springApp.prodSecret.passwordKey }}
-            - name: DB_URL
-              value: {{ .Values.springApp.db.url | quote }}
+                  name: {{ .Values.database.appSecret.name }}
+                  key: {{ default "jdbc-uri" .Values.database.appSecret.jdbcKey }}
             - name: DB_USERNAME
               valueFrom:
                 secretKeyRef:
@@ -55,6 +53,18 @@ spec:
                 secretKeyRef:
                   name: {{ .Values.database.appSecret.name }}
                   key: {{ .Values.database.appSecret.passwordKey }}
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: {{ .Values.springApp.containerPort }}
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: {{ .Values.springApp.containerPort }}
+            initialDelaySeconds: 30
+            periodSeconds: 10
           {{- with .Values.springApp.resources }}
           resources:
             {{- toYaml . | nindent 12 }}

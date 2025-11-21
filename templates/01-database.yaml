@@ -11,11 +11,11 @@ metadata:
 spec:
   instances: {{ .Values.database.instances }}
   imageName: {{ .Values.database.imageName }}
-  {{- if .Values.database.storage }}
-  {{- with .Values.database.storage.size }}
+  bootstrap:
+    initdb:
+      database: {{ .Values.database.initdb.database }}
+      owner: {{ .Values.database.initdb.owner }}
   storage:
-    size: {{ . }}
-  {{- end }}
-  {{- end }}
+    size: {{ .Values.database.storage.size }}
 {{- end }}
 

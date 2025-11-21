@@ -54,7 +54,8 @@ spec:
 
 ## CloudNativePG 시크릿 관리
 - `templates/01-database.yaml`에서 생성되는 CloudNativePG `Cluster`는 `my-db-app`(애플리케이션 접속용), `my-db-superuser`, `my-db-repl` 등의 시크릿을 자동 생성하고 로테이션합니다.
-- Spring / Nest 애플리케이션 템플릿은 `values.database.appSecret.*` 값을 통해 CNPG가 만든 시크릿을 참조합니다. 기본 설정에서는 `username`, `password` 키를 사용합니다.
+- Spring / Nest 애플리케이션 템플릿은 `values.database.appSecret.*` 값을 통해 CNPG가 만든 시크릿을 참조합니다. 기본 설정에서는 `username`, `password`, `jdbc-uri`, `host`, `port`, `dbname` 키를 사용합니다.
+- `values.yaml`에는 더 이상 DB URL/호스트/포트를 명시하지 않으며, Spring `DB_URL`과 Nest `DB_HOST`/`DB_PORT`/`DB_NAME` 모두 CNPG 시크릿에서 직접 읽습니다. 필요 시 `jdbcKey`, `hostKey`, `portKey`, `dbnameKey` 값을 변경해 맞춤 키를 사용할 수 있습니다.
 - DB 자격 증명이 바뀌면 CNPG가 시크릿을 갱신하므로, 애플리케이션 파드가 재시작되도록 `kubectl rollout restart` 또는 ArgoCD Sync를 실행해 주세요.
 - 반대로 `my-app-secrets`와 같은 비DB 시크릿은 수동으로 생성·관리해야 합니다(예: 다른 서비스 비밀번호).
 
