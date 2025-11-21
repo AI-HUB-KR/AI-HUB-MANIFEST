@@ -1,10 +1,13 @@
 # Global overrides
 nameOverride: ""
+
 fullnameOverride: ""
+
 namespace:
-  create: true
   name: ai-hub
+
 commonLabels: {}
+
 database:
   enabled: true
   name: my-db
@@ -23,6 +26,7 @@ database:
     hostKey: host
     portKey: port
     dbnameKey: dbname
+
 springApp:
   enabled: true
   name: main-server
@@ -31,6 +35,7 @@ springApp:
   image: ghcr.io/AI-HUB-KR/main-server:d2ec3ac9f3c583f6c2da8dc201b141cb6b6d348d
   containerPort: 8080
   springProfile: prod
+  existingSecret: "spring-app-secret"
   imagePullSecrets: []
   resources: {}
   podAnnotations: {}
@@ -39,6 +44,7 @@ springApp:
     type: ClusterIP
     port: 8080
     targetPort: 8080
+
 nestApp:
   enabled: true
   name: ai-api-server
@@ -46,6 +52,7 @@ nestApp:
   # AI-HUB-BE에서 nestApp.image로 찾음. 따라서 키 값 수정시 AI-API-SERVER도 수정해야 함.
   image: ghcr.io/AI-HUB-KR/ai-api-server:d9432cfbad42bf231dcbfd98ad22448c88b58aa4
   containerPort: 3000
+  existingSecret: "nest-app-secret"
   imagePullSecrets: []
   resources: {}
   podAnnotations: {}

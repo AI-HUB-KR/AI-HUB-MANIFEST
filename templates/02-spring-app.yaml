@@ -35,6 +35,11 @@ spec:
           image: {{ .Values.springApp.image }}
           ports:
             - containerPort: {{ .Values.springApp.containerPort }}
+          {{- if .Values.springApp.existingSecret }}
+          envFrom:
+            - secretRef:
+                name: {{ .Values.springApp.existingSecret }}
+          {{- end }}
           env:
             - name: SPRING_PROFILES_ACTIVE
               value: {{ .Values.springApp.springProfile | quote }}

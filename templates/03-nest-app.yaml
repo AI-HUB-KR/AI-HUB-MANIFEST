@@ -47,6 +47,11 @@ spec:
               port: {{ .Values.nestApp.containerPort }}
             initialDelaySeconds: 10
             periodSeconds: 5
+          {{- if .Values.nestApp.existingSecret }}
+          envFrom:
+            - secretRef:
+                name: {{ .Values.nestApp.existingSecret }}
+          {{- end }}
           env:
             - name: DB_HOST
               valueFrom:
