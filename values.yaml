@@ -32,7 +32,8 @@ springApp:
   containerPort: 8080
   springProfile: prod
   existingSecret: "spring-app-secret"
-  imagePullSecrets: []
+  imagePullSecrets:
+    - name: my-registry-secret
   resources: {}
   podAnnotations: {}
   service:
@@ -48,7 +49,8 @@ nestApp:
   image: ghcr.io/ai-hub-kr/ai-api-server:f521104fce5353278f893e025c4eba2bfe66da86
   containerPort: 3000
   existingSecret: "nest-app-secret"
-  imagePullSecrets: []
+  imagePullSecrets:
+    - name: my-registry-secret
   resources: {}
   podAnnotations: {}
   service:
