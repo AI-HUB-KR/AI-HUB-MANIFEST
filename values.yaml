@@ -45,7 +45,7 @@ nestApp:
   name: ai-api-server
   replicas: 2
   # AI-HUB-BE에서 nestApp.image로 찾음. 따라서 키 값 수정시 AI-API-SERVER도 수정해야 함.
-  image: ghcr.io/ai-hub-kr/ai-api-server:97d94ac89dd72c33ae7405de952496d85d0a5eac
+  image: ghcr.io/ai-hub-kr/ai-api-server:f521104fce5353278f893e025c4eba2bfe66da86
   containerPort: 3000
   existingSecret: "nest-app-secret"
   imagePullSecrets: []
