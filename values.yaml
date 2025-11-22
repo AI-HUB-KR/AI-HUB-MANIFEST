@@ -33,7 +33,7 @@ springApp:
   springProfile: prod
   existingSecret: "spring-app-secret"
   imagePullSecrets:
-    - name: my-registry-secret
+    - my-registry-secret
   resources: {}
   podAnnotations: {}
   service:
