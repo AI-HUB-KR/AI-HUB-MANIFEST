@@ -50,7 +50,7 @@ nestApp:
   containerPort: 3000
   existingSecret: "nest-app-secret"
   imagePullSecrets:
-    - name: my-registry-secret
+    - my-registry-secret
   resources: {}
   podAnnotations: {}
   service:
