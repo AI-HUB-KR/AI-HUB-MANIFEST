@@ -60,7 +60,7 @@ spec:
                   key: {{ .Values.database.appSecret.passwordKey }}
           livenessProbe:
             httpGet:
-              path: /actuator/health/liveness
+              path: api/actuator/health/liveness
               port: {{ .Values.springApp.containerPort }}
             initialDelaySeconds: 30
             periodSeconds: 10
