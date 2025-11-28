@@ -28,7 +28,7 @@ springApp:
   name: main-server
   replicas: 2
   # AI-HUB-BE에서 springApp.image로 찾음. 따라서 키 값 수정시 AI-HUB-BE도 수정해야 함.
-  image: ghcr.io/ai-hub-kr/main-server:70ee870d3e3e1266ce0cd70f25922065e048fad9
+  image: ghcr.io/ai-hub-kr/main-server:79553d2670db783547c50bf57d2da050b4068e0a
   containerPort: 8080
   springProfile: prod
   existingSecret: "spring-app-secret"
