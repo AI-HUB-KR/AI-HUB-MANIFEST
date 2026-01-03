@@ -23,6 +23,13 @@ database:
     hostKey: host
     portKey: port
     dbnameKey: dbname
+  backup:
+    enabled: true
+    retentionPolicy: "14d"
+    r2:
+      existingSecretName: "r2-secret"
+      bucketName: "aihub-db-backup"
+      endpoint: "https://94f2f97d1ba42a3f48abbb18a47d5435.r2.cloudflarestorage.com"
 springApp:
   enabled: true
   name: main-server
