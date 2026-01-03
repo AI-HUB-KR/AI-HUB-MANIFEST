@@ -25,7 +25,7 @@ database:
     dbnameKey: dbname
   backup:
     enabled: true
-    retentionPolicy: "14d"
+    retentionPolicy: "7d"
     r2:
       existingSecretName: "r2-secret"
       bucketName: "aihub-db-backup"
