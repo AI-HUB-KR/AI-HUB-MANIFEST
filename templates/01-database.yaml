@@ -17,6 +17,10 @@ spec:
       owner: {{ .Values.database.initdb.owner }}
   storage:
     size: {{ .Values.database.storage.size }}
+{{- if .Values.database.monitoring.enabled }}
+  monitoring:
+    enablePodMonitor: false  # PodMonitor를 별도로 생성하므로 false
+{{- end }}
 {{- if .Values.database.backup.enabled }}
   backup:
     retentionPolicy: {{ .Values.database.backup.retentionPolicy }}
@@ -47,6 +51,30 @@ spec:
   immediate: true
   cluster:
     name: {{ .Values.database.name }}
+{{- end }}
+
+{{- if and .Values.database.monitoring.enabled .Values.database.monitoring.podMonitor.enabled }}
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: {{ .Values.database.name }}-monitor
+  namespace: {{ include "ai-hub-manifest.targetNamespace" . }}
+  labels:
+    app.kubernetes.io/name: {{ .Values.database.name }}
+    app.kubernetes.io/component: database
+    {{- include "ai-hub-manifest.labels" . | nindent 4 }}
+    {{- with .Values.database.monitoring.podMonitor.additionalLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  selector:
+    matchLabels:
+      cnpg.io/cluster: {{ .Values.database.name }}
+  podMetricsEndpoints:
+    - port: metrics
+      interval: {{ .Values.database.monitoring.podMonitor.interval }}
+      scrapeTimeout: {{ .Values.database.monitoring.podMonitor.scrapeTimeout }}
 {{- end }}
 
 {{- end }}

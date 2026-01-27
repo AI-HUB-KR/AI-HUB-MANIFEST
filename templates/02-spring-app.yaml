@@ -19,10 +19,15 @@ spec:
         app: {{ .Values.springApp.name }}
         app.kubernetes.io/name: {{ .Values.springApp.name }}
         app.kubernetes.io/component: spring-app
-      {{- with .Values.springApp.podAnnotations }}
       annotations:
+        {{- if .Values.springApp.metrics.enabled }}
+        prometheus.io/scrape: "true"
+        prometheus.io/path: {{ .Values.springApp.metrics.path | quote }}
+        prometheus.io/port: {{ .Values.springApp.metrics.port | quote }}
+        {{- end }}
+        {{- with .Values.springApp.podAnnotations }}
         {{- toYaml . | nindent 8 }}
-      {{- end }}
+        {{- end }}
     spec:
       {{- with .Values.springApp.imagePullSecrets }}
       imagePullSecrets:
@@ -87,10 +92,38 @@ metadata:
 spec:
   type: {{ .Values.springApp.service.type }}
   ports:
-    - port: {{ .Values.springApp.service.port }}
+    - name: http
+      port: {{ .Values.springApp.service.port }}
       targetPort: {{ .Values.springApp.service.targetPort }}
       protocol: TCP
   selector:
     app: {{ .Values.springApp.name }}
+{{- if and .Values.springApp.metrics.enabled .Values.springApp.metrics.serviceMonitor.enabled }}
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ .Values.springApp.name }}-monitor
+  namespace: {{ include "ai-hub-manifest.targetNamespace" . }}
+  labels:
+    app.kubernetes.io/name: {{ .Values.springApp.name }}
+    app.kubernetes.io/component: spring-app
+    {{- include "ai-hub-manifest.labels" . | nindent 4 }}
+    {{- with .Values.springApp.metrics.serviceMonitor.additionalLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ .Values.springApp.name }}
+  namespaceSelector:
+    matchNames:
+      - {{ include "ai-hub-manifest.targetNamespace" . }}
+  endpoints:
+    - port: http
+      path: {{ .Values.springApp.metrics.path }}
+      interval: {{ .Values.springApp.metrics.serviceMonitor.interval }}
+      scrapeTimeout: {{ .Values.springApp.metrics.serviceMonitor.scrapeTimeout }}
+{{- end }}
 {{- end }}
 

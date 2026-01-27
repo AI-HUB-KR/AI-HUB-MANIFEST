@@ -30,6 +30,14 @@ database:
       existingSecretName: "r2-secret"
       bucketName: "aihub-db-backup"
       endpoint: "https://94f2f97d1ba42a3f48abbb18a47d5435.r2.cloudflarestorage.com"
+  # CloudNative-PG Prometheus 메트릭 설정
+  monitoring:
+    enabled: true
+    podMonitor:
+      enabled: true
+      interval: 30s
+      scrapeTimeout: 10s
+      additionalLabels: {}
 springApp:
   enabled: true
   name: main-server
@@ -43,6 +51,16 @@ springApp:
     - my-registry-secret
   resources: {}
   podAnnotations: {}
+  # Prometheus 메트릭 설정
+  metrics:
+    enabled: true
+    path: /actuator/prometheus
+    port: 8080
+    serviceMonitor:
+      enabled: true
+      interval: 30s
+      scrapeTimeout: 10s
+      additionalLabels: {}
   service:
     name: main-svc
     type: ClusterIP
@@ -60,6 +78,16 @@ nestApp:
     - my-registry-secret
   resources: {}
   podAnnotations: {}
+  # Prometheus 메트릭 설정
+  metrics:
+    enabled: true
+    path: /metrics
+    port: 3000
+    serviceMonitor:
+      enabled: true
+      interval: 30s
+      scrapeTimeout: 10s
+      additionalLabels: {}
   service:
     name: ai-api-svc
     type: ClusterIP
