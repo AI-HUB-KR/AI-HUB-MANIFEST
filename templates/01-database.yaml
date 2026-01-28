@@ -19,7 +19,7 @@ spec:
     size: {{ .Values.database.storage.size }}
 {{- if .Values.database.monitoring.enabled }}
   monitoring:
-    enablePodMonitor: false  # PodMonitor를 별도로 생성하므로 false
+    enablePodMonitor: true  # CNPG 오퍼레이터가 PodMonitor를 자동 생성
 {{- end }}
 {{- if and .Values.database.monitoring.enabled .Values.database.monitoring.istio.enabled .Values.database.monitoring.istio.excludeMetricsPort }}
   # Istio mTLS 환경에서 메트릭 수집을 위한 Pod annotation 설정
@@ -57,30 +57,6 @@ spec:
   immediate: true
   cluster:
     name: {{ .Values.database.name }}
-{{- end }}
-
-{{- if and .Values.database.monitoring.enabled .Values.database.monitoring.podMonitor.enabled }}
----
-apiVersion: monitoring.coreos.com/v1
-kind: PodMonitor
-metadata:
-  name: {{ .Values.database.name }}-monitor
-  namespace: {{ include "ai-hub-manifest.targetNamespace" . }}
-  labels:
-    app.kubernetes.io/name: {{ .Values.database.name }}
-    app.kubernetes.io/component: database
-    {{- include "ai-hub-manifest.labels" . | nindent 4 }}
-    {{- with .Values.database.monitoring.podMonitor.additionalLabels }}
-    {{- toYaml . | nindent 4 }}
-    {{- end }}
-spec:
-  selector:
-    matchLabels:
-      cnpg.io/cluster: {{ .Values.database.name }}
-  podMetricsEndpoints:
-    - port: metrics
-      interval: {{ .Values.database.monitoring.podMonitor.interval }}
-      scrapeTimeout: {{ .Values.database.monitoring.podMonitor.scrapeTimeout }}
 {{- end }}
 
 {{- end }}

@@ -33,11 +33,6 @@ database:
   # CloudNative-PG Prometheus 메트릭 설정
   monitoring:
     enabled: true
-    podMonitor:
-      enabled: true
-      interval: 30s
-      scrapeTimeout: 10s
-      additionalLabels: {}
     # Istio mTLS 환경에서 메트릭 수집을 위한 설정
     istio:
       enabled: true
