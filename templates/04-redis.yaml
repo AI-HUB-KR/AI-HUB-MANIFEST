@@ -1,0 +1,186 @@
+{{- if .Values.redis.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.redis.name }}
+  namespace: {{ include "ai-hub-manifest.targetNamespace" . }}
+  labels:
+    app.kubernetes.io/name: {{ .Values.redis.name }}
+    app.kubernetes.io/component: redis
+    {{- include "ai-hub-manifest.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.redis.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.redis.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.redis.name }}
+        app.kubernetes.io/name: {{ .Values.redis.name }}
+        app.kubernetes.io/component: redis
+      annotations:
+        {{- if .Values.redis.metrics.enabled }}
+        prometheus.io/scrape: "true"
+        prometheus.io/port: {{ .Values.redis.metrics.port | quote }}
+        {{- end }}
+        {{- if and .Values.redis.metrics.enabled .Values.redis.metrics.istio.enabled .Values.redis.metrics.istio.excludeMetricsPort }}
+        traffic.sidecar.istio.io/excludeInboundPorts: {{ .Values.redis.metrics.port | quote }}
+        {{- end }}
+        {{- with .Values.redis.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      containers:
+        - name: redis
+          image: {{ .Values.redis.image }}
+          ports:
+            - containerPort: {{ .Values.redis.containerPort }}
+              name: redis
+          {{- if .Values.redis.password.enabled }}
+          args:
+            - "--requirepass"
+            - "$(REDIS_PASSWORD)"
+          env:
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.redis.password.secretName }}
+                  key: {{ .Values.redis.password.secretKey }}
+          {{- end }}
+          livenessProbe:
+            exec:
+              command:
+                - redis-cli
+                {{- if .Values.redis.password.enabled }}
+                - -a
+                - $(REDIS_PASSWORD)
+                {{- end }}
+                - ping
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+          readinessProbe:
+            exec:
+              command:
+                - redis-cli
+                {{- if .Values.redis.password.enabled }}
+                - -a
+                - $(REDIS_PASSWORD)
+                {{- end }}
+                - ping
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 3
+          {{- with .Values.redis.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- if .Values.redis.persistence.enabled }}
+          volumeMounts:
+            - name: redis-data
+              mountPath: /data
+          {{- end }}
+        {{- if .Values.redis.metrics.enabled }}
+        - name: redis-exporter
+          image: {{ .Values.redis.metrics.image }}
+          ports:
+            - containerPort: {{ .Values.redis.metrics.port }}
+              name: metrics
+          env:
+            - name: REDIS_ADDR
+              value: "redis://localhost:{{ .Values.redis.containerPort }}"
+            {{- if .Values.redis.password.enabled }}
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.redis.password.secretName }}
+                  key: {{ .Values.redis.password.secretKey }}
+            {{- end }}
+          resources:
+            limits:
+              cpu: 500m
+              memory: 256Mi
+            requests:
+              cpu: 500m
+              memory: 256Mi
+        {{- end }}
+      {{- if .Values.redis.persistence.enabled }}
+      volumes:
+        - name: redis-data
+          persistentVolumeClaim:
+            claimName: {{ .Values.redis.name }}-pvc
+      {{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.redis.service.name }}
+  namespace: {{ include "ai-hub-manifest.targetNamespace" . }}
+  labels:
+    app.kubernetes.io/name: {{ .Values.redis.name }}
+    app.kubernetes.io/component: redis
+    {{- include "ai-hub-manifest.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.redis.service.type }}
+  ports:
+    - name: redis
+      port: {{ .Values.redis.service.port }}
+      targetPort: {{ .Values.redis.containerPort }}
+      protocol: TCP
+    {{- if .Values.redis.metrics.enabled }}
+    - name: metrics
+      port: {{ .Values.redis.metrics.port }}
+      targetPort: {{ .Values.redis.metrics.port }}
+      protocol: TCP
+    {{- end }}
+  selector:
+    app: {{ .Values.redis.name }}
+{{- if and .Values.redis.metrics.enabled .Values.redis.metrics.serviceMonitor.enabled }}
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ .Values.redis.name }}-monitor
+  namespace: {{ include "ai-hub-manifest.targetNamespace" . }}
+  labels:
+    app.kubernetes.io/name: {{ .Values.redis.name }}
+    app.kubernetes.io/component: redis
+    {{- include "ai-hub-manifest.labels" . | nindent 4 }}
+    {{- with .Values.redis.metrics.serviceMonitor.additionalLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ .Values.redis.name }}
+  namespaceSelector:
+    matchNames:
+      - {{ include "ai-hub-manifest.targetNamespace" . }}
+  endpoints:
+    - port: metrics
+      interval: {{ .Values.redis.metrics.serviceMonitor.interval }}
+      scrapeTimeout: {{ .Values.redis.metrics.serviceMonitor.scrapeTimeout }}
+{{- end }}
+{{- if .Values.redis.persistence.enabled }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Values.redis.name }}-pvc
+  namespace: {{ include "ai-hub-manifest.targetNamespace" . }}
+  labels:
+    app.kubernetes.io/name: {{ .Values.redis.name }}
+    app.kubernetes.io/component: redis
+    {{- include "ai-hub-manifest.labels" . | nindent 4 }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.redis.persistence.size }}
+  {{- if .Values.redis.persistence.storageClass }}
+  storageClassName: {{ .Values.redis.persistence.storageClass }}
+  {{- end }}
+{{- end }}
+{{- end }}

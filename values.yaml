@@ -114,3 +114,38 @@ nestApp:
     type: ClusterIP
     port: 3000
     targetPort: 3000
+
+# Redis 설정
+redis:
+  enabled: true
+  name: redis
+  replicas: 1
+  image: redis:8-alpine
+  containerPort: 6379
+  password:
+    enabled: true
+    secretName: "redis-secret"
+    secretKey: "redis-password"
+  persistence:
+    enabled: false
+  resources: {}
+  podAnnotations: {}
+  # Prometheus 메트릭 설정
+  metrics:
+    enabled: true
+    image: oliver006/redis_exporter:v1.66.0-alpine
+    port: 9121
+    serviceMonitor:
+      enabled: true
+      interval: 30s
+      scrapeTimeout: 10s
+      additionalLabels:
+        release: prometheus
+    # Istio mTLS 환경에서 메트릭 수집을 위한 설정
+    istio:
+      enabled: true
+      excludeMetricsPort: true
+  service:
+    name: redis-svc
+    type: ClusterIP
+    port: 6379

@@ -68,6 +68,19 @@ spec:
                 secretKeyRef:
                   name: {{ .Values.database.appSecret.name }}
                   key: {{ .Values.database.appSecret.passwordKey }}
+            {{- if .Values.redis.enabled }}
+            - name: REDIS_HOST
+              value: {{ .Values.redis.service.name }}
+            - name: REDIS_PORT
+              value: {{ .Values.redis.service.port | quote }}
+            {{- if .Values.redis.password.enabled }}
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.redis.password.secretName }}
+                  key: {{ .Values.redis.password.secretKey }}
+            {{- end }}
+            {{- end }}
           livenessProbe:
             httpGet:
               path: actuator/health/liveness
