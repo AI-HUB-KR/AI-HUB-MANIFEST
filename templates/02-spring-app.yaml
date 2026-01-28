@@ -26,6 +26,10 @@ spec:
         prometheus.io/path: {{ .Values.springApp.metrics.path | quote }}
         prometheus.io/port: {{ .Values.springApp.metrics.port | quote }}
         {{- end }}
+        {{- if and .Values.springApp.metrics.enabled .Values.springApp.metrics.istio.enabled .Values.springApp.metrics.istio.excludeMetricsPort }}
+        # Istio sidecar에서 메트릭 포트 제외 - mTLS 없이 Prometheus가 직접 스크랩 가능
+        traffic.sidecar.istio.io/excludeInboundPorts: {{ .Values.springApp.metrics.port | quote }}
+        {{- end }}
         {{- with .Values.springApp.podAnnotations }}
         {{- toYaml . | nindent 8 }}
         {{- end }}

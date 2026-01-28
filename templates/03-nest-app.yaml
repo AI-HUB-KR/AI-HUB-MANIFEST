@@ -26,6 +26,10 @@ spec:
         prometheus.io/path: {{ .Values.nestApp.metrics.path | quote }}
         prometheus.io/port: {{ .Values.nestApp.metrics.port | quote }}
         {{- end }}
+        {{- if and .Values.nestApp.metrics.enabled .Values.nestApp.metrics.istio.enabled .Values.nestApp.metrics.istio.excludeMetricsPort }}
+        # Istio sidecar에서 메트릭 포트 제외 - mTLS 없이 Prometheus가 직접 스크랩 가능
+        traffic.sidecar.istio.io/excludeInboundPorts: {{ .Values.nestApp.metrics.port | quote }}
+        {{- end }}
         {{- with .Values.nestApp.podAnnotations }}
         {{- toYaml . | nindent 8 }}
         {{- end }}

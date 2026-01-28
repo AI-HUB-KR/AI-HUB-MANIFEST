@@ -38,6 +38,11 @@ database:
       interval: 30s
       scrapeTimeout: 10s
       additionalLabels: {}
+    # Istio mTLS 환경에서 메트릭 수집을 위한 설정
+    istio:
+      enabled: true
+      # 메트릭 포트를 Istio sidecar에서 제외 (PERMISSIVE 모드 불필요)
+      excludeMetricsPort: true
 springApp:
   enabled: true
   name: main-server
@@ -62,6 +67,11 @@ springApp:
       interval: 30s
       scrapeTimeout: 10s
       additionalLabels: {}
+    # Istio mTLS 환경에서 메트릭 수집을 위한 설정
+    istio:
+      enabled: true
+      # 메트릭 포트를 Istio sidecar에서 제외
+      excludeMetricsPort: true
   service:
     name: main-svc
     type: ClusterIP
@@ -90,6 +100,11 @@ nestApp:
       interval: 30s
       scrapeTimeout: 10s
       additionalLabels: {}
+    # Istio mTLS 환경에서 메트릭 수집을 위한 설정
+    istio:
+      enabled: true
+      # 메트릭 포트를 Istio sidecar에서 제외
+      excludeMetricsPort: true
   service:
     name: ai-api-svc
     type: ClusterIP
