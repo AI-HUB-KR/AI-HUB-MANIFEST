@@ -10,6 +10,7 @@ metadata:
     {{- include "ai-hub-manifest.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.springApp.replicas }}
+  revisionHistoryLimit: {{ .Values.springApp.revisionHistoryLimit }}
   selector:
     matchLabels:
       app: {{ .Values.springApp.name }}

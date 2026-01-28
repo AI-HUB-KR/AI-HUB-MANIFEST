@@ -42,6 +42,7 @@ springApp:
   enabled: true
   name: main-server
   replicas: 2
+  revisionHistoryLimit: 5
   # AI-HUB-BE에서 springApp.image로 찾음. 따라서 키 값 수정시 AI-HUB-BE도 수정해야 함.
   image: ghcr.io/ai-hub-kr/main-server:1959b6369671fa5f7ac79564f37551586f85f54c
   containerPort: 8080
@@ -70,6 +71,7 @@ nestApp:
   enabled: true
   name: ai-api-server
   replicas: 2
+  revisionHistoryLimit: 5
   # AI-HUB-BE에서 nestApp.image로 찾음. 따라서 키 값 수정시 AI-API-SERVER도 수정해야 함.
   image: ghcr.io/ai-hub-kr/ai-api-server:d6f401b7b73b38da5e4952afdf9f7440eebbd38b
   containerPort: 3000
