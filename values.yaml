@@ -38,7 +38,8 @@ database:
       enabled: true
       interval: 30s
       scrapeTimeout: 10s
-      additionalLabels: {}
+      additionalLabels:
+        release: prometheus
     # Istio mTLS 환경에서 메트릭 수집을 위한 설정
     istio:
       enabled: true
@@ -67,7 +68,8 @@ springApp:
       enabled: true
       interval: 30s
       scrapeTimeout: 10s
-      additionalLabels: {}
+      additionalLabels:
+        release: prometheus
     # Istio mTLS 환경에서 메트릭 수집을 위한 설정
     istio:
       enabled: true
@@ -100,7 +102,8 @@ nestApp:
       enabled: true
       interval: 30s
       scrapeTimeout: 10s
-      additionalLabels: {}
+      additionalLabels:
+        release: prometheus
     # Istio mTLS 환경에서 메트릭 수집을 위한 설정
     istio:
       enabled: true
