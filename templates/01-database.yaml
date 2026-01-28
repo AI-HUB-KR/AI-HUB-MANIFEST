@@ -23,8 +23,8 @@ spec:
 {{- end }}
 {{- if and .Values.database.monitoring.enabled .Values.database.monitoring.istio.enabled .Values.database.monitoring.istio.excludeMetricsPort }}
   # Istio mTLS 환경에서 메트릭 수집을 위한 Pod annotation 설정
-  managed:
-    podAnnotation:
+  inheritedMetadata:
+    annotations:
       traffic.sidecar.istio.io/excludeInboundPorts: "9187"  # CloudNative-PG metrics port
 {{- end }}
 {{- if .Values.database.backup.enabled }}
