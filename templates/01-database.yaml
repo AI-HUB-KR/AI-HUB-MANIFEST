@@ -20,6 +20,13 @@ spec:
 {{- if .Values.database.monitoring.enabled }}
   monitoring:
     enablePodMonitor: true  # CNPG 오퍼레이터가 PodMonitor를 자동 생성
+    podMonitorMetricRelabelings:
+      - sourceLabels: [__name__]
+        action: keep
+        regex: "cnpg_.*"
+    podMonitorMetadata:
+      labels:
+        {{- include "ai-hub-manifest.labels" . | nindent 8 }}
 {{- end }}
 {{- if and .Values.database.monitoring.enabled .Values.database.monitoring.istio.enabled .Values.database.monitoring.istio.excludeMetricsPort }}
   # Istio mTLS 환경에서 메트릭 수집을 위한 Pod annotation 설정
