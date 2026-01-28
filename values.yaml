@@ -33,6 +33,12 @@ database:
   # CloudNative-PG Prometheus 메트릭 설정
   monitoring:
     enabled: true
+    # 수동 PodMonitor 설정 (CNPG v1.27에서 enablePodMonitor는 deprecated)
+    podMonitor:
+      enabled: true
+      interval: 30s
+      scrapeTimeout: 10s
+      additionalLabels: {}
     # Istio mTLS 환경에서 메트릭 수집을 위한 설정
     istio:
       enabled: true
